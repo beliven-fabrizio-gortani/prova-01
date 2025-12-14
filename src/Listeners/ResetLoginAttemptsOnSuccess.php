@@ -3,30 +3,22 @@
 namespace Beliven\Prova01\Listeners;
 
 use Illuminate\Auth\Events\Login;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Beliven\Prova01\Models\LoginLock;
 
 /**
- * Listener that resets login attempts and removes any lockout when a user successfully logs in.
+ * Listener that resets login attempts and removes any persistent lockout when a user successfully logs in.
  *
  * Behavior:
- * - Removes cache keys used by the demo throttle:
- *     - attempts key: prova01:login_attempts:{identifier}
- *     - lockout key:  prova01:login_lockout:{identifier}
+ * - Uses the `login_locks` table (via the LoginLock model) to clear attempts and any lockout for the identifier.
  *
  * Identifier resolution:
  * - Prefers the logged-in user's `email` attribute (lowercased)
  * - Falls back to `username` attribute if present
  * - Finally falls back to the current request IP
- *
- * This keeps the demo behaviour consistent with the failed-attempt listener.
  */
 class ResetLoginAttemptsOnSuccess
 {
-    protected string $attemptsPrefix = 'prova01:login_attempts:';
-
-    protected string $lockoutPrefix = 'prova01:login_lockout:';
-
     /**
      * Handle the event.
      */
@@ -34,12 +26,14 @@ class ResetLoginAttemptsOnSuccess
     {
         $identifier = $this->resolveIdentifierFromLoginEvent($event);
 
-        $attemptsKey = $this->attemptsPrefix.$identifier;
-        $lockoutKey = $this->lockoutPrefix.$identifier;
-
-        // Remove attempts counter and any existing lockout for this identifier.
-        Cache::forget($attemptsKey);
-        Cache::forget($lockoutKey);
+        // Find the persistent lock record and reset attempts / remove lockout if present.
+        try {
+            $lock = LoginLock::findOrCreate($identifier);
+            $lock->resetAttempts();
+        } catch (\Throwable $e) {
+            // In case the DB is not available or other problem, fail silently for demo purposes.
+            // In production you might want to log this.
+        }
     }
 
     /**
@@ -52,17 +46,17 @@ class ResetLoginAttemptsOnSuccess
         if ($user !== null) {
             // Prefer email
             if (isset($user->email) && $user->email) {
-                return 'email|'.Str::lower((string) $user->email);
+                return "email|" . Str::lower((string) $user->email);
             }
 
             // Prefer username property if present
             if (isset($user->username) && $user->username) {
-                return 'username|'.Str::lower((string) $user->username);
+                return "username|" . Str::lower((string) $user->username);
             }
 
             // Some apps may use different identifiers, attempt id as fallback (grouped)
             if (isset($user->id)) {
-                return 'id|'.(string) $user->id;
+                return "id|" . (string) $user->id;
             }
         }
 
@@ -70,13 +64,13 @@ class ResetLoginAttemptsOnSuccess
         try {
             $ip = request()->ip();
             if ($ip) {
-                return 'ip|'.$ip;
+                return "ip|" . $ip;
             }
         } catch (\Throwable $e) {
             // ignore - no request available
         }
 
         // Final fallback to a global identifier to avoid exceptions
-        return 'unknown|global';
+        return "unknown|global";
     }
 }

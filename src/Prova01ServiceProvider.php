@@ -23,10 +23,10 @@ class Prova01ServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('prova-01')
+            ->name("prova-01")
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_prova_01_table')
+            ->hasMigration("create_login_locks_table")
             ->hasCommand(Prova01Command::class);
     }
 
@@ -49,7 +49,7 @@ class Prova01ServiceProvider extends PackageServiceProvider
         // ->middleware('prova01.login.throttle')
         $router = $this->app->make(Router::class);
         $router->aliasMiddleware(
-            'prova01.login.throttle',
+            "prova01.login.throttle",
             LoginThrottle::class,
         );
     }
