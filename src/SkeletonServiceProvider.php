@@ -16,10 +16,10 @@ class SkeletonServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('skeleton')
+            ->name("skeleton")
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_migration_table_name_table')
+            ->hasMigration("create_migration_table_name_table")
             ->hasCommand(SkeletonCommand::class);
     }
 }
