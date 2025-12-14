@@ -2,16 +2,16 @@
 
 namespace Beliven\Prova01;
 
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Beliven\Prova01\Commands\Prova01Command;
-use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Auth\Events\Failed;
-use Illuminate\Auth\Events\Login;
 use Beliven\Prova01\Http\Middleware\LoginThrottle;
 use Beliven\Prova01\Listeners\RecordFailedLoginAttempt;
 use Beliven\Prova01\Listeners\ResetLoginAttemptsOnSuccess;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Event;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class Prova01ServiceProvider extends PackageServiceProvider
 {
@@ -23,10 +23,10 @@ class Prova01ServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name("prova-01")
+            ->name('prova-01')
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration("create_prova_01_table")
+            ->hasMigration('create_prova_01_table')
             ->hasCommand(Prova01Command::class);
     }
 
@@ -49,7 +49,7 @@ class Prova01ServiceProvider extends PackageServiceProvider
         // ->middleware('prova01.login.throttle')
         $router = $this->app->make(Router::class);
         $router->aliasMiddleware(
-            "prova01.login.throttle",
+            'prova01.login.throttle',
             LoginThrottle::class,
         );
     }

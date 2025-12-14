@@ -4,10 +4,8 @@ namespace Beliven\Prova01\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
-use Carbon\Carbon;
 
 /**
  * Simple login throttle middleware for demo purposes.
@@ -33,6 +31,7 @@ use Carbon\Carbon;
 class LoginThrottle
 {
     protected string $attemptsPrefix = 'prova01:login_attempts:';
+
     protected string $lockoutPrefix = 'prova01:login_lockout:';
 
     /**
@@ -41,8 +40,6 @@ class LoginThrottle
      * If the identifier is locked, returns a 429 JSON response with the configured
      * lockout message and a Retry-After header (seconds until unlock).
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
@@ -56,7 +53,7 @@ class LoginThrottle
 
         $identifier = $this->getIdentifier($request);
 
-        $lockoutKey = $this->lockoutPrefix . $identifier;
+        $lockoutKey = $this->lockoutPrefix.$identifier;
 
         if ($this->isLocked($lockoutKey)) {
             [$secondsLeft, $message] = $this->getLockoutInfo($lockoutKey, $config);
@@ -68,7 +65,7 @@ class LoginThrottle
 
             // Add Retry-After header (in seconds)
             if ($secondsLeft !== null) {
-                $response->headers->set('Retry-After', (string) max(0, (int)$secondsLeft));
+                $response->headers->set('Retry-After', (string) max(0, (int) $secondsLeft));
             }
 
             return $response;
@@ -86,22 +83,19 @@ class LoginThrottle
      * - Else fallback to client IP.
      *
      * This keeps the demo simple and works for typical auth forms.
-     *
-     * @param Request $request
-     * @return string
      */
     protected function getIdentifier(Request $request): string
     {
         if ($request->filled('email')) {
-            return 'email|' . mb_strtolower((string) $request->input('email'));
+            return 'email|'.mb_strtolower((string) $request->input('email'));
         }
 
         if ($request->filled('username')) {
-            return 'username|' . mb_strtolower((string) $request->input('username'));
+            return 'username|'.mb_strtolower((string) $request->input('username'));
         }
 
         // fallback to IP
-        return 'ip|' . $request->ip();
+        return 'ip|'.$request->ip();
     }
 
     /**
@@ -109,9 +103,6 @@ class LoginThrottle
      *
      * The lockout data is expected to be a UNIX timestamp (expiry time).
      * If the stored value is true/1 we treat it as locked but with unknown expiry.
-     *
-     * @param string $lockoutKey
-     * @return bool
      */
     protected function isLocked(string $lockoutKey): bool
     {
@@ -133,8 +124,6 @@ class LoginThrottle
     /**
      * Compute seconds left for lockout and the message to show.
      *
-     * @param string $lockoutKey
-     * @param array $config
      * @return array [int|null $secondsLeft, string $message]
      */
     protected function getLockoutInfo(string $lockoutKey, array $config): array

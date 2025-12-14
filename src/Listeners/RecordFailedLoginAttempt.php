@@ -28,13 +28,11 @@ use Illuminate\Support\Str;
 class RecordFailedLoginAttempt
 {
     protected string $attemptsPrefix = 'prova01:login_attempts:';
+
     protected string $lockoutPrefix = 'prova01:login_lockout:';
 
     /**
      * Handle the event.
-     *
-     * @param  \Illuminate\Auth\Events\Failed  $event
-     * @return void
      */
     public function handle(Failed $event): void
     {
@@ -51,8 +49,8 @@ class RecordFailedLoginAttempt
 
         $identifier = $this->resolveIdentifierFromFailedEvent($event);
 
-        $attemptsKey = $this->attemptsPrefix . $identifier;
-        $lockoutKey = $this->lockoutPrefix . $identifier;
+        $attemptsKey = $this->attemptsPrefix.$identifier;
+        $lockoutKey = $this->lockoutPrefix.$identifier;
 
         // If already locked, nothing to do.
         if (Cache::has($lockoutKey)) {
@@ -88,9 +86,6 @@ class RecordFailedLoginAttempt
 
     /**
      * Resolve an identifier string from the Failed event.
-     *
-     * @param Failed $event
-     * @return string
      */
     protected function resolveIdentifierFromFailedEvent(Failed $event): string
     {
@@ -98,11 +93,11 @@ class RecordFailedLoginAttempt
 
         if (is_array($credentials)) {
             if (! empty($credentials['email'])) {
-                return 'email|' . Str::lower((string) $credentials['email']);
+                return 'email|'.Str::lower((string) $credentials['email']);
             }
 
             if (! empty($credentials['username'])) {
-                return 'username|' . Str::lower((string) $credentials['username']);
+                return 'username|'.Str::lower((string) $credentials['username']);
             }
         }
 
@@ -111,7 +106,7 @@ class RecordFailedLoginAttempt
         try {
             $ip = request()->ip();
             if ($ip) {
-                return 'ip|' . $ip;
+                return 'ip|'.$ip;
             }
         } catch (\Throwable $e) {
             // ignore - no request available

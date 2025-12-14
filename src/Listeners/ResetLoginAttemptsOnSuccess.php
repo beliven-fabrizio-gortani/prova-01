@@ -24,20 +24,18 @@ use Illuminate\Support\Str;
 class ResetLoginAttemptsOnSuccess
 {
     protected string $attemptsPrefix = 'prova01:login_attempts:';
+
     protected string $lockoutPrefix = 'prova01:login_lockout:';
 
     /**
      * Handle the event.
-     *
-     * @param  \Illuminate\Auth\Events\Login  $event
-     * @return void
      */
     public function handle(Login $event): void
     {
         $identifier = $this->resolveIdentifierFromLoginEvent($event);
 
-        $attemptsKey = $this->attemptsPrefix . $identifier;
-        $lockoutKey = $this->lockoutPrefix . $identifier;
+        $attemptsKey = $this->attemptsPrefix.$identifier;
+        $lockoutKey = $this->lockoutPrefix.$identifier;
 
         // Remove attempts counter and any existing lockout for this identifier.
         Cache::forget($attemptsKey);
@@ -46,9 +44,6 @@ class ResetLoginAttemptsOnSuccess
 
     /**
      * Resolve an identifier string from the Login event.
-     *
-     * @param  \Illuminate\Auth\Events\Login  $event
-     * @return string
      */
     protected function resolveIdentifierFromLoginEvent(Login $event): string
     {
@@ -57,17 +52,17 @@ class ResetLoginAttemptsOnSuccess
         if ($user !== null) {
             // Prefer email
             if (isset($user->email) && $user->email) {
-                return 'email|' . Str::lower((string) $user->email);
+                return 'email|'.Str::lower((string) $user->email);
             }
 
             // Prefer username property if present
             if (isset($user->username) && $user->username) {
-                return 'username|' . Str::lower((string) $user->username);
+                return 'username|'.Str::lower((string) $user->username);
             }
 
             // Some apps may use different identifiers, attempt id as fallback (grouped)
             if (isset($user->id)) {
-                return 'id|' . (string) $user->id;
+                return 'id|'.(string) $user->id;
             }
         }
 
@@ -75,7 +70,7 @@ class ResetLoginAttemptsOnSuccess
         try {
             $ip = request()->ip();
             if ($ip) {
-                return 'ip|' . $ip;
+                return 'ip|'.$ip;
             }
         } catch (\Throwable $e) {
             // ignore - no request available

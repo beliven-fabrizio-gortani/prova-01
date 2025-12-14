@@ -16,10 +16,10 @@ return [
     | - lockout_message: message returned to the user when locked out
     |
     */
-    "login_throttle" => [
-        "max_attempts" => 5,
-        "decay_minutes" => 1,
-        "lockout_duration" => 15,
-        "lockout_message" => "Too many login attempts. Please try again later.",
+    'login_throttle' => [
+        'max_attempts' => 5,
+        'decay_minutes' => 1,
+        'lockout_duration' => 15,
+        'lockout_message' => 'Too many login attempts. Please try again later.',
     ],
 ];
