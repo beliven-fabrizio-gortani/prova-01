@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Beliven\Lockout\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class LockoutCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'lockout';
 
     public $description = 'My command';
 

@@ -1,0 +1,65 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Config;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        $tableName = Config::get('lockout.table', 'lockouts');
+
+        Schema::create($tableName, function (Blueprint $table) {
+            $table->id();
+
+            // Optional relation to users table (nullable so package works without a users table)
+            $table->unsignedBigInteger('user_id')->nullable()->index();
+
+            // Identifier for the account (email, username, etc)
+            $table->string('identifier')->index();
+
+            // Number of failed attempts
+            $table->unsignedInteger('attempts')->default(0);
+
+            // When the account was locked (null means not locked)
+            $table->timestamp('locked_at')->nullable()->index();
+
+            // Optional reason for lock (e.g. \"too_many_attempts\")
+            $table->string('reason')->nullable();
+
+            // Additional metadata as JSON (IP address, user agent, etc)
+            $table->json('metadata')->nullable();
+
+            $table->timestamps();
+        });
+
+        // Add foreign key if the users table exists to keep migration robust in different apps
+        if (Schema::hasTable('users')) {
+            Schema::table($tableName, function (Blueprint $table) {
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            });
+        }
+    }
+
+    public function down()
+    {
+        $tableName = Config::get('lockout.table', 'lockouts');
+
+        // Drop foreign key first if exists, then drop table
+        if (Schema::hasTable($tableName)) {
+            // Attempt to drop foreign key if it exists (silently ignore if not)
+            Schema::table($tableName, function (Blueprint $table) {
+                // The foreign key name can vary by DB; attempt to drop by convention
+                try {
+                    $table->dropForeign([$table->getTable() ? 'user_id' : 'user_id']);
+                } catch (\Throwable $e) {
+                    // ignore if foreign key doesn't exist
+                }
+            });
+
+            Schema::dropIfExists($tableName);
+        }
+    }
+};
