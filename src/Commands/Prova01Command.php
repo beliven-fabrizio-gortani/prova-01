@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Beliven\Prova01\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class Prova01Command extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'prova-01';
 
     public $description = 'My command';
 
