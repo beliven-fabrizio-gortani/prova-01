@@ -2,7 +2,6 @@
 
 namespace Beliven\Prova01;
 
-use Beliven\Prova01\Commands\Prova01Command;
 use Beliven\Prova01\Http\Middleware\LoginThrottle;
 use Beliven\Prova01\Listeners\RecordFailedLoginAttempt;
 use Beliven\Prova01\Listeners\ResetLoginAttemptsOnSuccess;
@@ -23,9 +22,9 @@ class Prova01ServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name("prova-01")
+            ->name('prova-01')
             ->hasConfigFile()
-            ->hasMigration("create_login_locks_table");
+            ->hasMigration('create_login_locks_table');
     }
 
     /**
@@ -43,40 +42,40 @@ class Prova01ServiceProvider extends PackageServiceProvider
         // Register publishable resources so `php artisan vendor:publish` works.
         // Migration stub (published with a timestamp prefix)
         $migrationStub =
-            __DIR__ .
-            "/../database/migrations/create_login_locks_table.php.stub";
+            __DIR__.
+            '/../database/migrations/create_login_locks_table.php.stub';
         if (is_file($migrationStub)) {
             $this->publishes(
                 [
                     $migrationStub => database_path(
-                        "migrations/" .
-                            date("Y_m_d_His") .
-                            "_create_login_locks_table.php",
+                        'migrations/'.
+                            date('Y_m_d_His').
+                            '_create_login_locks_table.php',
                     ),
                 ],
-                "prova-01-migrations",
+                'prova-01-migrations',
             );
         }
 
         // Configuration file
-        $configStub = __DIR__ . "/../config/prova-01.php";
+        $configStub = __DIR__.'/../config/prova-01.php';
         if (is_file($configStub)) {
             $this->publishes(
                 [
-                    $configStub => config_path("prova-01.php"),
+                    $configStub => config_path('prova-01.php'),
                 ],
-                "prova-01-config",
+                'prova-01-config',
             );
         }
 
         // Views (optional)
-        $viewsDir = __DIR__ . "/../resources/views";
+        $viewsDir = __DIR__.'/../resources/views';
         if (is_dir($viewsDir)) {
             $this->publishes(
                 [
-                    $viewsDir => resource_path("views/vendor/prova-01"),
+                    $viewsDir => resource_path('views/vendor/prova-01'),
                 ],
-                "prova-01-views",
+                'prova-01-views',
             );
         }
     }
@@ -87,7 +86,7 @@ class Prova01ServiceProvider extends PackageServiceProvider
         // ->middleware('prova01.login.throttle')
         $router = $this->app->make(Router::class);
         $router->aliasMiddleware(
-            "prova01.login.throttle",
+            'prova01.login.throttle',
             LoginThrottle::class,
         );
     }
