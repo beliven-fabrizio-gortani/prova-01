@@ -66,9 +66,7 @@ class LoginLock extends Model
      *
      * Returns true if the record became locked as a result of this call.
      *
-     * @param int $maxAttempts
-     * @param int $decayMinutes        // not directly used here but left for symmetry with cache impl
-     * @param int $lockoutDurationMinutes
+     * @param  int  $decayMinutes  // not directly used here but left for symmetry with cache impl
      */
     public function incrementAttempts(int $maxAttempts = 5, int $decayMinutes = 1, int $lockoutDurationMinutes = 15): bool
     {
@@ -126,8 +124,6 @@ class LoginLock extends Model
 
     /**
      * Get seconds remaining until unlock, or null if not locked.
-     *
-     * @return int|null
      */
     public function secondsUntilUnlock(): ?int
     {

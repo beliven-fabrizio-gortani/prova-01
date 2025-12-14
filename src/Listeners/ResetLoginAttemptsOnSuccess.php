@@ -2,9 +2,9 @@
 
 namespace Beliven\Prova01\Listeners;
 
+use Beliven\Prova01\Models\LoginLock;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Str;
-use Beliven\Prova01\Models\LoginLock;
 
 /**
  * Listener that resets login attempts and removes any persistent lockout when a user successfully logs in.
@@ -46,17 +46,17 @@ class ResetLoginAttemptsOnSuccess
         if ($user !== null) {
             // Prefer email
             if (isset($user->email) && $user->email) {
-                return "email|" . Str::lower((string) $user->email);
+                return 'email|'.Str::lower((string) $user->email);
             }
 
             // Prefer username property if present
             if (isset($user->username) && $user->username) {
-                return "username|" . Str::lower((string) $user->username);
+                return 'username|'.Str::lower((string) $user->username);
             }
 
             // Some apps may use different identifiers, attempt id as fallback (grouped)
             if (isset($user->id)) {
-                return "id|" . (string) $user->id;
+                return 'id|'.(string) $user->id;
             }
         }
 
@@ -64,13 +64,13 @@ class ResetLoginAttemptsOnSuccess
         try {
             $ip = request()->ip();
             if ($ip) {
-                return "ip|" . $ip;
+                return 'ip|'.$ip;
             }
         } catch (\Throwable $e) {
             // ignore - no request available
         }
 
         // Final fallback to a global identifier to avoid exceptions
-        return "unknown|global";
+        return 'unknown|global';
     }
 }

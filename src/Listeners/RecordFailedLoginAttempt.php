@@ -2,10 +2,10 @@
 
 namespace Beliven\Prova01\Listeners;
 
+use Beliven\Prova01\Models\LoginLock;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
-use Beliven\Prova01\Models\LoginLock;
 
 /**
  * Listener that records failed login attempts and sets a persistent DB lockout when a threshold is reached.
@@ -28,17 +28,16 @@ class RecordFailedLoginAttempt
      */
     public function handle(Failed $event): void
     {
-        $config = Config::get("prova-01.login_throttle", [
-            "max_attempts" => 5,
-            "decay_minutes" => 1,
-            "lockout_duration" => 15,
-            "lockout_message" =>
-                "Too many login attempts. Please try again later.",
+        $config = Config::get('prova-01.login_throttle', [
+            'max_attempts' => 5,
+            'decay_minutes' => 1,
+            'lockout_duration' => 15,
+            'lockout_message' => 'Too many login attempts. Please try again later.',
         ]);
 
-        $maxAttempts = (int) ($config["max_attempts"] ?? 5);
-        $decayMinutes = (int) ($config["decay_minutes"] ?? 1);
-        $lockoutDuration = (int) ($config["lockout_duration"] ?? 15);
+        $maxAttempts = (int) ($config['max_attempts'] ?? 5);
+        $decayMinutes = (int) ($config['decay_minutes'] ?? 1);
+        $lockoutDuration = (int) ($config['lockout_duration'] ?? 15);
 
         $identifier = $this->resolveIdentifierFromFailedEvent($event);
 
@@ -68,13 +67,13 @@ class RecordFailedLoginAttempt
         $credentials = $event->credentials ?? [];
 
         if (is_array($credentials)) {
-            if (!empty($credentials["email"])) {
-                return "email|" . Str::lower((string) $credentials["email"]);
+            if (! empty($credentials['email'])) {
+                return 'email|'.Str::lower((string) $credentials['email']);
             }
 
-            if (!empty($credentials["username"])) {
-                return "username|" .
-                    Str::lower((string) $credentials["username"]);
+            if (! empty($credentials['username'])) {
+                return 'username|'.
+                    Str::lower((string) $credentials['username']);
             }
         }
 
@@ -83,12 +82,12 @@ class RecordFailedLoginAttempt
         try {
             $ip = request()->ip();
             if ($ip) {
-                return "ip|" . $ip;
+                return 'ip|'.$ip;
             }
         } catch (\Throwable $e) {
             // ignore - no request available
         }
 
-        return "unknown|global";
+        return 'unknown|global';
     }
 }

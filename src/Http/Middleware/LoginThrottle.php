@@ -2,12 +2,10 @@
 
 namespace Beliven\Prova01\Http\Middleware;
 
+use Beliven\Prova01\Models\LoginLock;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Config;
-use Beliven\Prova01\Models\LoginLock;
-use Carbon\Carbon;
 
 /**
  * Middleware that checks persistent login locks stored in the database.
@@ -28,12 +26,11 @@ class LoginThrottle
      */
     public function handle(Request $request, Closure $next)
     {
-        $config = Config::get("prova-01.login_throttle", [
-            "max_attempts" => 5,
-            "decay_minutes" => 1,
-            "lockout_duration" => 15,
-            "lockout_message" =>
-                "Too many login attempts. Please try again later.",
+        $config = Config::get('prova-01.login_throttle', [
+            'max_attempts' => 5,
+            'decay_minutes' => 1,
+            'lockout_duration' => 15,
+            'lockout_message' => 'Too many login attempts. Please try again later.',
         ]);
 
         $identifier = $this->getIdentifier($request);
@@ -50,13 +47,13 @@ class LoginThrottle
         if ($lock->isLocked()) {
             $secondsLeft = $lock->secondsUntilUnlock();
             $message =
-                $config["lockout_message"] ??
-                "Too many login attempts. Please try again later.";
+                $config['lockout_message'] ??
+                'Too many login attempts. Please try again later.';
 
             $response = response()->json(
                 [
-                    "message" => $message,
-                    "retry_after" => $secondsLeft,
+                    'message' => $message,
+                    'retry_after' => $secondsLeft,
                 ],
                 429,
             );
@@ -64,7 +61,7 @@ class LoginThrottle
             // Add Retry-After header (in seconds) if we know the remaining time
             if ($secondsLeft !== null) {
                 $response->headers->set(
-                    "Retry-After",
+                    'Retry-After',
                     (string) max(0, (int) $secondsLeft),
                 );
             }
@@ -82,22 +79,19 @@ class LoginThrottle
      * - If the request contains 'email' use that.
      * - Else if contains 'username' use that.
      * - Else fallback to client IP.
-     *
-     * @param Request $request
-     * @return string
      */
     protected function getIdentifier(Request $request): string
     {
-        if ($request->filled("email")) {
-            return "email|" . mb_strtolower((string) $request->input("email"));
+        if ($request->filled('email')) {
+            return 'email|'.mb_strtolower((string) $request->input('email'));
         }
 
-        if ($request->filled("username")) {
-            return "username|" .
-                mb_strtolower((string) $request->input("username"));
+        if ($request->filled('username')) {
+            return 'username|'.
+                mb_strtolower((string) $request->input('username'));
         }
 
         // fallback to IP
-        return "ip|" . $request->ip();
+        return 'ip|'.$request->ip();
     }
 }
