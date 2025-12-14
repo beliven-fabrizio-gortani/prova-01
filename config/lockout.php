@@ -10,7 +10,7 @@ return [
     | The database table name where lockout records will be stored.
     |
     */
-    "table" => env("LOCKOUT_TABLE", "lockouts"),
+    'table' => env('LOCKOUT_TABLE', 'lockouts'),
 
     /*
     |--------------------------------------------------------------------------
@@ -21,7 +21,7 @@ return [
     | override this if you want to extend the model in your application.
     |
     */
-    "model" => Beliven\Lockout\Models\Lockout::class,
+    'model' => Beliven\Lockout\Models\Lockout::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -33,7 +33,7 @@ return [
     | does not rely on cache by default.
     |
     */
-    "max_attempts" => env("LOCKOUT_MAX_ATTEMPTS", 5),
+    'max_attempts' => env('LOCKOUT_MAX_ATTEMPTS', 5),
 
     /*
     |--------------------------------------------------------------------------
@@ -44,7 +44,7 @@ return [
     | automatic expiration, set this to an integer number of seconds.
     |
     */
-    "expires_after_seconds" => env("LOCKOUT_EXPIRES_AFTER_SECONDS", null),
+    'expires_after_seconds' => env('LOCKOUT_EXPIRES_AFTER_SECONDS', null),
 
     /*
     |--------------------------------------------------------------------------
@@ -56,7 +56,7 @@ return [
     | but by default we keep it false to satisfy "no cache" requirement.
     |
     */
-    "use_cache" => env("LOCKOUT_USE_CACHE", false),
+    'use_cache' => env('LOCKOUT_USE_CACHE', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -68,8 +68,8 @@ return [
     | the alias name here if needed.
     |
     */
-    "middleware" => [
-        "alias" => "lockout.check",
+    'middleware' => [
+        'alias' => 'lockout.check',
     ],
 
     /*
@@ -81,10 +81,10 @@ return [
     | run side effects (notifications, audits, etc).
     |
     */
-    "events" => [
-        "locked" => Beliven\Lockout\Events\UserLocked::class,
-        "unlocked" => Beliven\Lockout\Events\UserUnlocked::class,
-        "attempt_failed" => Beliven\Lockout\Events\FailedAttempt::class,
+    'events' => [
+        'locked' => Beliven\Lockout\Events\UserLocked::class,
+        'unlocked' => Beliven\Lockout\Events\UserUnlocked::class,
+        'attempt_failed' => Beliven\Lockout\Events\FailedAttempt::class,
     ],
 
     /*
@@ -97,7 +97,7 @@ return [
     | the service container.
     |
     */
-    "service" => Beliven\Lockout\Lockout::class,
+    'service' => Beliven\Lockout\Lockout::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -108,5 +108,5 @@ return [
     | with this name. The package skeleton already contains a matching stub.
     |
     */
-    "migration" => "create_lockout_table",
+    'migration' => 'create_lockout_table',
 ];

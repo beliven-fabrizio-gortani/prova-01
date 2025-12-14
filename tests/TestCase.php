@@ -2,9 +2,9 @@
 
 namespace Beliven\Lockout\Tests;
 
+use Beliven\Lockout\LockoutServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Beliven\Lockout\LockoutServiceProvider;
 
 class TestCase extends Orchestra
 {

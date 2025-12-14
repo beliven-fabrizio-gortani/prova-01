@@ -17,15 +17,12 @@ class FailedAttempt
 
     /**
      * The lockout model instance.
-     *
-     * @var \Beliven\Lockout\Models\Lockout
      */
     public Lockout $lockout;
 
     /**
      * Create a new event instance.
      *
-     * @param  \Beliven\Lockout\Models\Lockout  $lockout
      * @return void
      */
     public function __construct(Lockout $lockout)

@@ -26,8 +26,6 @@ class LockoutCheckMiddleware
      * identifier is locked according to the persistent lockout store, this
      * middleware will abort the request with a 423 Locked response.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
      * @return mixed
      *
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException

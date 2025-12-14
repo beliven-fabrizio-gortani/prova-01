@@ -3,13 +3,9 @@
 namespace Beliven\Lockout;
 
 use Beliven\Lockout\Models\Lockout as LockoutModel;
-use Carbon\Carbon;
-use Closure;
 use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Main Lockout service.
@@ -26,25 +22,25 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class Lockout
 {
     protected LockoutModel $model;
+
     protected Dispatcher $events;
 
     public function __construct(Dispatcher $events)
     {
         $this->model =
-            Config::get("lockout.model", LockoutModel::class) ===
+            Config::get('lockout.model', LockoutModel::class) ===
             LockoutModel::class
-                ? new LockoutModel()
-                : app(Config::get("lockout.model"));
+                ? new LockoutModel
+                : app(Config::get('lockout.model'));
         $this->events = $events;
     }
 
     /**
      * Record a failed authentication attempt for the given identifier.
      *
-     * @param string $identifier  The login identifier (email, username, ...)
-     * @param int|null $userId    Optional user id if known
-     * @param array $metadata     Optional metadata (ip, user_agent, etc)
-     * @return LockoutModel
+     * @param  string  $identifier  The login identifier (email, username, ...)
+     * @param  int|null  $userId  Optional user id if known
+     * @param  array  $metadata  Optional metadata (ip, user_agent, etc)
      */
     public function recordFailedAttempt(
         string $identifier,
@@ -61,7 +57,7 @@ class Lockout
         $record->incrementAttempts(1);
 
         // attach metadata (merge)
-        if (!empty($metadata)) {
+        if (! empty($metadata)) {
             $existing = (array) $record->metadata;
             $record->metadata = array_merge($existing, $metadata);
             $record->save();
@@ -69,15 +65,15 @@ class Lockout
 
         // fire failed attempt event
         $this->dispatchEvent(
-            "attempt_failed",
+            'attempt_failed',
             new Events\FailedAttempt($record),
         );
 
         // If attempts exceed configured max, lock the account
-        $max = Config::get("lockout.max_attempts", 5);
+        $max = Config::get('lockout.max_attempts', 5);
         if ($record->attempts >= $max) {
-            $record->lock("too_many_attempts", ["max" => $max]);
-            $this->dispatchEvent("locked", new Events\UserLocked($record));
+            $record->lock('too_many_attempts', ['max' => $max]);
+            $this->dispatchEvent('locked', new Events\UserLocked($record));
         }
 
         return $record;
@@ -85,25 +81,16 @@ class Lockout
 
     /**
      * Check if an identifier is locked.
-     *
-     * @param string $identifier
-     * @return bool
      */
     public function isLocked(string $identifier): bool
     {
-        $record = LockoutModel::where("identifier", $identifier)->first();
+        $record = LockoutModel::where('identifier', $identifier)->first();
 
         return $record ? $record->isLocked() : false;
     }
 
     /**
      * Lock an identifier explicitly.
-     *
-     * @param string $identifier
-     * @param int|null $userId
-     * @param string|null $reason
-     * @param array|null $metadata
-     * @return LockoutModel
      */
     public function lock(
         string $identifier,
@@ -112,9 +99,9 @@ class Lockout
         ?array $metadata = null,
     ): LockoutModel {
         $record = LockoutModel::forIdentifier($identifier, $userId);
-        if (!$record->isLocked()) {
+        if (! $record->isLocked()) {
             $record->lock($reason, $metadata);
-            $this->dispatchEvent("locked", new Events\UserLocked($record));
+            $this->dispatchEvent('locked', new Events\UserLocked($record));
         }
 
         return $record;
@@ -122,24 +109,20 @@ class Lockout
 
     /**
      * Unlock an identifier.
-     *
-     * @param string $identifier
-     * @param bool $resetAttempts
-     * @return LockoutModel|null
      */
     public function unlock(
         string $identifier,
         bool $resetAttempts = true,
     ): ?LockoutModel {
-        $record = LockoutModel::where("identifier", $identifier)->first();
+        $record = LockoutModel::where('identifier', $identifier)->first();
 
-        if (!$record) {
+        if (! $record) {
             return null;
         }
 
         if ($record->isLocked()) {
             $record->unlock($resetAttempts);
-            $this->dispatchEvent("unlocked", new Events\UserUnlocked($record));
+            $this->dispatchEvent('unlocked', new Events\UserUnlocked($record));
         }
 
         return $record;
@@ -147,41 +130,34 @@ class Lockout
 
     /**
      * Get attempts count for identifier (0 if none).
-     *
-     * @param string $identifier
-     * @return int
      */
     public function getAttempts(string $identifier): int
     {
-        $record = LockoutModel::where("identifier", $identifier)->first();
+        $record = LockoutModel::where('identifier', $identifier)->first();
 
         return $record ? $record->attempts ?? 0 : 0;
     }
 
     /**
      * Reset attempts to zero for identifier.
-     *
-     * @param string $identifier
-     * @return LockoutModel|null
      */
     public function resetAttempts(string $identifier): ?LockoutModel
     {
-        $record = LockoutModel::where("identifier", $identifier)->first();
+        $record = LockoutModel::where('identifier', $identifier)->first();
 
-        if (!$record) {
+        if (! $record) {
             return null;
         }
 
         $record->resetAttempts();
+
         return $record;
     }
 
     /**
      * Helper to dispatch events by alias configured in config.lockout.events or default.
      *
-     * @param string $alias  'attempt_failed'|'locked'|'unlocked'
-     * @param object $event
-     * @return void
+     * @param  string  $alias  'attempt_failed'|'locked'|'unlocked'
      */
     protected function dispatchEvent(string $alias, object $event): void
     {
@@ -193,7 +169,7 @@ class Lockout
         }
 
         // Also dispatch an event name from config if present (legacy)
-        $eventClass = Config::get("lockout.events." . $alias, null);
+        $eventClass = Config::get('lockout.events.'.$alias, null);
         if ($eventClass && is_string($eventClass)) {
             try {
                 $this->events->dispatch(
@@ -236,7 +212,7 @@ class LockoutCheckMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        $identifierKey = Config::get("lockout.identifier_column", "email");
+        $identifierKey = Config::get('lockout.identifier_column', 'email');
 
         $identifier =
             $request->input($identifierKey) ?? $request->get($identifierKey);
@@ -250,7 +226,7 @@ class LockoutCheckMiddleware
         $service = App::make(\Beliven\Lockout\Lockout::class);
 
         if ($service->isLocked((string) $identifier)) {
-            $message = Config::get("lockout.message", "Account locked.");
+            $message = Config::get('lockout.message', 'Account locked.');
             // 423 Locked (WebDAV) is commonly used to indicate resource locked
             throw new HttpException(423, $message);
         }

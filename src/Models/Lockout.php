@@ -57,8 +57,6 @@ class Lockout extends Model
 
     /**
      * Create a new model instance and set the table name from config.
-     *
-     * @param  array  $attributes
      */
     public function __construct(array $attributes = [])
     {
@@ -69,8 +67,6 @@ class Lockout extends Model
 
     /**
      * Relation to the user model (if available).
-     *
-     * @return BelongsTo
      */
     public function user(): BelongsTo
     {
@@ -82,8 +78,6 @@ class Lockout extends Model
     /**
      * Mark this lockout as locked now.
      *
-     * @param  string|null  $reason
-     * @param  array|null   $metadata
      * @return $this
      */
     public function lock(?string $reason = null, ?array $metadata = null): self
@@ -105,7 +99,6 @@ class Lockout extends Model
     /**
      * Unlock this record (clear locked_at and reset attempts if desired).
      *
-     * @param  bool  $resetAttempts
      * @return $this
      */
     public function unlock(bool $resetAttempts = true): self
@@ -124,7 +117,6 @@ class Lockout extends Model
     /**
      * Increment attempts and return the model.
      *
-     * @param  int  $by
      * @return $this
      */
     public function incrementAttempts(int $by = 1): self
@@ -154,8 +146,6 @@ class Lockout extends Model
      * By default this checks for non-null locked_at. Expiration behavior (if any)
      * can be implemented by the service layer — config('lockout.expires_after_seconds')
      * is available for optional expiry semantics.
-     *
-     * @return bool
      */
     public function isLocked(): bool
     {
@@ -176,8 +166,6 @@ class Lockout extends Model
     /**
      * Find or create a lockout record for the given identifier.
      *
-     * @param  string  $identifier
-     * @param  int|null  $userId
      * @return static
      */
     public static function forIdentifier(string $identifier, ?int $userId = null): self
@@ -210,10 +198,7 @@ class Lockout extends Model
     /**
      * Helper: lock if attempts reached configured max attempts.
      *
-     * @param  int|null  $maxAttempts
-     * @param  string|null  $reason
-     * @param  array|null  $metadata
-     * @return bool  true if newly locked
+     * @return bool true if newly locked
      */
     public function lockIfExceeded(?int $maxAttempts = null, ?string $reason = null, ?array $metadata = null): bool
     {
@@ -221,6 +206,7 @@ class Lockout extends Model
 
         if ($this->attempts >= $max && ! $this->isLocked()) {
             $this->lock($reason, $metadata);
+
             return true;
         }
 
